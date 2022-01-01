@@ -73,6 +73,10 @@ contract VideoChain {
         string memory _poster,
         string memory _description
     ) public {
+        require(bytes(_title).length > 0, "Enter a valid title");
+        require(bytes(_url).length > 0, "Enter a valid url");
+        require(bytes(_poster).length > 0, "Enter a valid poster");
+        require(bytes(_description).length > 0, "Enter a valid description");
         videos[videoCount] = Video(
             payable(msg.sender),
             _title,
@@ -82,7 +86,7 @@ contract VideoChain {
             0,
             0
         );
-        videoCount++;
+        videoCount = videoCount.add(1);
     }
 
     // get a certain video
@@ -95,6 +99,7 @@ contract VideoChain {
         uint,
         uint
     ) {
+        require(videos[_index].owner != address (0), "this video does not exist");
         return (
             videos[_index].owner,
             videos[_index].title,
@@ -108,7 +113,7 @@ contract VideoChain {
     
     // support video
     function supportVideo(uint _index, uint _amount) notOwner(_index) public payable  {
-
+        require(videos[_index].owner != address (0), "this video does not exist");
         require(
                 IERC20Token(cUsdTokenAddress).transferFrom(
                 msg.sender,

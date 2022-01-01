@@ -3,18 +3,15 @@ import { newKitFromWeb3 } from "@celo/contractkit";
 import BigNumber from "bignumber.js";
 import erc20Abi from "../contract/erc20.abi.json";
 import VideoChainAbi from "../contract/videoChain.abi.json";
+import {VideoChainContractAddressAbi, ERC20_DECIMALS, cUSDContractAddress} from "./utils/constants";
 require("arrive");
 
-const ERC20_DECIMALS = 18;
-const cUSDContractAddress = "0xb053651858F145b3127504C1045a1FEf8976BFfB";
-const VideoChainContractAddressAbi = "0x2789a773F022C5F1FF6B6a73FdDB40b55a69165A";
 
 let kit;
 let contract;
 let videos = [];
 
 const connectCeloWallet = async function () {
-  console.log("connecting celo");
   if (window.celo) {
     try {
       notification("⚠️ Please approve this DApp to connect to your wallet.");
@@ -38,10 +35,10 @@ const connectCeloWallet = async function () {
 async function approve(_price) {
   const cUSDContract = new kit.web3.eth.Contract(erc20Abi, cUSDContractAddress);
 
-  const result = await cUSDContract.methods
+  return await cUSDContract.methods
     .approve(VideoChainContractAddressAbi, _price)
     .send({ from: kit.defaultAccount });
-  return result;
+
 }
 
 const getBalance = async function () {
@@ -51,7 +48,7 @@ const getBalance = async function () {
   return cUSDBalance;
 };
 
-document.querySelector("#newVideoBtn").addEventListener("click", async (e) => {
+document.querySelector("#newVideoBtn").addEventListener("click", async () => {
   const params = [
     document.getElementById("newTitle").value,
     document.getElementById("newVideoURL").value,
@@ -61,7 +58,7 @@ document.querySelector("#newVideoBtn").addEventListener("click", async (e) => {
 
   notification(`⌛ Adding "${params[0]}"...`);
   try {
-    const result = await contract.methods
+    await contract.methods
       .uploadVideo(...params)
       .send({ from: kit.defaultAccount });
   } catch (error) {
@@ -91,7 +88,7 @@ async function supportVideo(index) {
   notification(`⌛ Awaiting payment for "${videos[index].title}"...`);
 
   try {
-    const result = await contract.methods
+    await contract.methods
       .supportVideo(...params)
       .send({ from: kit.defaultAccount });
 
@@ -109,7 +106,7 @@ const getVideos = async function () {
   const _videos = [];
 
   for (let i = 0; i < _videosCount; i++) {
-    let _video = new Promise(async (resolve, reject) => {
+    let _video = new Promise(async (resolve) => {
       let video = await contract.methods.getVideo(i).call();
 
       resolve({
